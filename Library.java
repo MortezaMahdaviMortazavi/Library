@@ -1,100 +1,203 @@
 import java.util.Scanner;
 
-public class Library {
-    Row[] rows;
-    Book[] allBookOfLibrary;
+class Person{
+    String name;
+    Book[] booksThatBorrowed = new Book[100];
+    int numberOfBorrowing;
+    boolean isInLibrary;
 
-    public Library(int numberOfRows, int numberOfShelves, int numberOfBooks) {
-        this.rows = new Row[numberOfRows];
-        for (int i = 0; i < numberOfRows; i++) {
-            this.rows[i] = new Row(numberOfShelves);
-            for (int j = 0; j < numberOfShelves; j++) {
-                this.rows[i].shelves[j] = new Shelf(numberOfBooks);
-                for (int k = 0; k < numberOfBooks; k++) {
-                    this.rows[i].shelves[j].books[k] = new Book("Book " + k, 100);
-                }
-            }
+    Person(String name){
+        this.name=name;
+        numberOfBorrowing=0;
+    }
+    void borrow(){
+        numberOfBorrowing++;
+    }
+    void returnBook(){
+        numberOfBorrowing--;
+    }
+
+    void changePositionOfBeingInLibrary(){
+        isInLibrary=!isInLibrary;
+    }
+}
+
+class Book{
+    String name = new String();
+    int count;
+    int numberOfBorrowing;
+    int borrowed;
+    
+    Book(String name){
+        this.name=name;
+        count=1;
+    }   
+    void add(){
+        count++;
+    }
+    void remove(){
+        count--;
+    }
+    void borrow(){
+        borrowed++;
+    }
+}
+
+class BookNode{
+    BookNode parent;
+    BookNode[] children= new BookNode[27];
+    Book book;
+    char character;
+
+    BookNode(char character, BookNode parent){
+        this.character=character;
+        this.parent=parent;
+        this.book = new Book(setBookName());
+    }
+
+    String setBookName(){
+        StringBuilder name = new StringBuilder();
+        BookNode temp = this;
+        while (temp.parent!=null){
+            name.insert(0,temp.character);
+            temp=temp.parent;
         }
-        this.allBookOfLibrary = new Book[numberOfRows * numberOfShelves * numberOfBooks];
-        int index = 0;
-        for (int i = 0; i < numberOfRows; i++) {
-            for (int j = 0; j < numberOfShelves; j++) {
-                for (int k = 0; k < numberOfBooks; k++) {
-                    this.allBookOfLibrary[index] = this.rows[i].shelves[j].books[k];
-                    index++;
-                }
-            }
+        // Inverse the name 
+        name = name.reverse();
+        return name.toString().strip();
+    }
+}
+
+class LibrariesBooks{
+    BookNode root;
+
+    LibrariesBooks(){
+        root=new BookNode(' ',null);
+        for (int i=0; i<27; i++){
+            root.children[i]=new BookNode((char)(i+65),root);
         }
     }
 
-    class Shelf {
-        Book[] books;
-
-        public Shelf(int size) {
-            this.books = new Book[size];
-        }
-    }
-
-    class Row {
-        Shelf[] shelves;
-
-        public Row(int size) {
-            this.shelves = new Shelf[size];
-        }
-
-    }
-
-    class LibrarySystem {
-        Member[] allMembers;
-        Member[] currentMembersInLibrary;
-        int numberOfMembers;
-        int numberOfCurrentMembers;
-
-        public LibrarySystem(int numberOfMembers) {
-            this.numberOfMembers = numberOfMembers;
-            this.allMembers = new Member[numberOfMembers];
-            // initial all members
-            for (int i = 0; i < numberOfMembers; i++) {
-                this.allMembers[i] = new Member("Member " + i, i, Library.this.allBookOfLibrary.length);
+    void addNewBook(Book book, int count){
+        BookNode temp = root;
+        for (int i=0; i<book.name.length(); i++){
+            int index = book.name.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new BookNode(book.name.charAt(i),temp);
             }
-            this.currentMembersInLibrary = new Member[numberOfMembers];
-            this.numberOfCurrentMembers = 0;
+            temp=temp.children[index];
         }
-
-        // Function 1
-        void arrive(String memberName) {
-            for (int i = 0; i < this.numberOfMembers; i++) {
-                if (this.allMembers[i].name.equals(memberName)) {
-                    this.currentMembersInLibrary[this.numberOfCurrentMembers] = this.allMembers[i];
-                    this.numberOfCurrentMembers++;
-                    return;
-                }
-            }
-            System.out.println("Member has not been registered");
-        }
-
-        void exit(String memberName) { // this function have a bug that should be fixed.prefer to bring members to
-                                       // linkedlist
-            for (int i = 0; i < this.numberOfCurrentMembers; i++) {
-                if (this.currentMembersInLibrary[i].name.equals(memberName)) {
-                    this.currentMembersInLibrary[i] = this.currentMembersInLibrary[this.numberOfCurrentMembers - 1];
-                    this.numberOfCurrentMembers--;
-                    return;
-                }
-            }
-            System.out.println("Member isnt in library or has not been registered");
-        }
-
-        void isInLib(String memberName) {
-            for (int i = 0; i < this.numberOfCurrentMembers; i++) {
-                if (this.currentMembersInLibrary[i].name.equals(memberName)) {
-                    System.out.println("Member is in library");
-                    return;
-                }
-            }
-            System.out.println("Member isnt in library or has not been registered");
-        }
-
+        temp.book.count += count;
+        
     }
 
 }
+
+class PersonNode{
+    PersonNode parent;
+    PersonNode[] children= new PersonNode[27];
+    Person person;
+    char character;
+
+    PersonNode(char character, PersonNode parent){
+        this.character=character;
+        this.parent=parent;
+        this.person = new Person(setPersonName());
+    }
+
+    String setPersonName(){
+        StringBuilder name = new StringBuilder();
+        PersonNode temp = this;
+        while (temp.parent!=null){
+            name.insert(0,temp.character);
+            temp=temp.parent;
+        }
+        // Inverse the name 
+        name = name.reverse();
+        return name.toString().strip();
+    }
+}
+
+class LibrariesPeople{
+    PersonNode root;
+    LibrariesBooks librariesBooks;
+    
+    LibrariesPeople(){
+        root=new PersonNode(' ',null);
+        for (int i=0; i<27; i++){
+            root.children[i]=new PersonNode((char)(i+65),root);
+        }
+    }
+
+    void arrive(Person person){
+        PersonNode temp = root;
+        for (int i=0; i<person.name.length(); i++){
+            int index = person.name.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(person.name.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (!temp.person.isInLibrary){
+            temp.person.changePositionOfBeingInLibrary();
+        }
+
+    }
+
+    void exit(Person person){
+        PersonNode temp = root;
+        for (int i=0; i<person.name.length(); i++){
+            int index = person.name.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(person.name.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person.isInLibrary){
+            temp.person.changePositionOfBeingInLibrary();
+        }
+    }
+
+    void borrowBook(String personName, String bookName){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+        if (!temp.person.isInLibrary){
+            System.out.println("The person is not in the library");
+            return;
+        }
+        BookNode temp2 = librariesBooks.root;
+        for (int i=0; i<bookName.length(); i++){
+            int index = bookName.charAt(i)-65;
+            if (temp2.children[index]==null){
+                temp2.children[index]=new BookNode(bookName.charAt(i),temp2);
+            }
+            temp2=temp2.children[index];
+        }
+        if (temp2.book.count==0){
+            System.out.println("The book is not available");
+            return;
+        }
+        temp.person.borrow();
+        temp2.book.borrow();
+        temp.person.booksThatBorrowed[temp.person.numberOfBorrowing-1]=temp2.book;
+    }
+
+
+
+}
+
+
+
+
+
+
+
