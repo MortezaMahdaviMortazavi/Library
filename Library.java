@@ -108,6 +108,7 @@ class Person{
     BinaryTree binaryTree;
     int numberOfBorrowing;
     int numberOfAllTimeBooks;
+    int[] timesThatBeingInLibrary = new int[100];
     boolean isInLibrary;
 
 
@@ -136,6 +137,13 @@ class Person{
     }
     public int allTimeBooks() {
         return numberOfAllTimeBooks;
+    }
+    public String totalTimeInLibrary(float startTime, float endTime) {
+        int totalTime = 0;
+        for (int i = 0; i < timesThatBeingInLibrary.length; i++){
+            totalTime += timesThatBeingInLibrary[i];
+        }
+        return "Total time of " + name + " in library is: " + totalTime + " minutes";
     }
 }
 
@@ -371,30 +379,24 @@ class LibrariesPeople{
         }
     }
 
-    // void TotalTimeInLib(String personName,float startTime,float endTime){
-    //     PersonNode temp = root;
-    //     for (int i=0; i<personName.length(); i++){
-    //         int index = personName.charAt(i)-65;
-    //         if (temp.children[index]==null){
-    //             temp.children[index]=new PersonNode(personName.charAt(i),temp);
-    //         }
-    //         temp=temp.children[index];
-    //     }
-    //     if (temp.person==null){
-    //         temp.person=new Person(personName);
-    //     }
-    //     if (temp.person.isInLibrary){
-    //         System.out.println("The person is in the library");
-    //         return;
-    //     }
-    //     float totalTime = 0;
-    //     for (int i=0; i<temp.person.timeInLibrary.size(); i++){
-    //         if (temp.person.timeInLibrary.get(i).get(0) >= startTime && temp.person.timeInLibrary.get(i).get(1) <= endTime){
-    //             totalTime += temp.person.timeInLibrary.get(i).get(1) - temp.person.timeInLibrary.get(i).get(0);
-    //         }
-    //     }
-    //     System.out.println("The total time is "+totalTime);
-    // }
+    void TotalTimeInLib(String personName,float startTime,float endTime){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+        if (!temp.person.isInLibrary){
+            System.out.println("The person is not in the library");
+            return;
+        }
+        System.out.println("The total time is "+temp.person.totalTimeInLibrary(startTime,endTime));
+    }
 
     void shouldBring(String personName,String bookName){
         PersonNode temp = root;
@@ -457,7 +459,7 @@ class LibrariesPeople{
     }
 
     void allPersonsBorrowedThisBook(){
-        
+
     }
     int allPersonAllTimeBooks(String personName){
         PersonNode temp = root;
