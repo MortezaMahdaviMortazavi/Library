@@ -93,22 +93,33 @@ class BinaryTree {
         }
         return root;
     }
+
+    void inorder(Node root){
+        if (root != null){
+            inorder(root.left);
+            System.out.print(root.data + " ");
+            inorder(root.right);
+        }
+    }
 }
 
 class Person{
     String name;
     BinaryTree binaryTree;
     int numberOfBorrowing;
+    int numberOfAllTimeBooks;
     boolean isInLibrary;
+
 
     Person(String name){
         this.name=name;
         numberOfBorrowing=0;
+        numberOfAllTimeBooks=0;
     }
     void borrow(String bookName){
         binaryTree.insert(bookName);
         numberOfBorrowing++;
-        
+        numberOfAllTimeBooks++;
     }
     void returnBook(String bookName){
         binaryTree.delete(bookName);
@@ -117,6 +128,14 @@ class Person{
 
     void changePositionOfBeingInLibrary(){
         isInLibrary=!isInLibrary;
+    }
+    public void printAllBooks() {
+        System.out.println("All books of " + name + " are: ");
+        binaryTree.inorder(binaryTree.root);
+        System.out.println();
+    }
+    public int allTimeBooks() {
+        return numberOfAllTimeBooks;
     }
 }
 
@@ -145,6 +164,11 @@ class Book{
     void borrow(String personName){
         binaryTree.insert(personName);
         borrowed++;
+    }
+    public void printAllPerson() {
+        System.out.println("All persons who borrowed " + name + " are: ");
+        binaryTree.inorder(binaryTree.root);
+        System.out.println();
     }
 }
 
@@ -400,18 +424,62 @@ class LibrariesPeople{
         
     }
 
+    void allPersonCurrentBooks(String personName){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+        // print all books with inorder
+        temp.person.printAllBooks();
+    }
+
+    void allPersonHaveThisBook(String bookName){
+        BookNode temp = librariesBooks.root;
+        for (int i=0; i<bookName.length(); i++){
+            int index = bookName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new BookNode(bookName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.book==null){
+            temp.book=new Book(bookName);
+        }
+        // print all books with inorder
+        temp.book.printAllPerson();
+    }
+
+    void allPersonsBorrowedThisBook(){
+        
+    }
+    int allPersonAllTimeBooks(String personName){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+
+        return temp.person.allTimeBooks();
+        
+    }
 
 }
 
-
-
 public class Library {
     public static void main(String[] args) {
-        String s = "AB";
-        String n = "AC";
-        // determine which string is more prior
-
-        System.out.println(s.compareTo(n));
-
+        System.out.println("Hello World!");
     }
 }
