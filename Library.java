@@ -1,8 +1,103 @@
 import java.util.Scanner;
 
+class BinaryTree {
+    class Node{
+        Node left;
+        Node right;
+        Node parent;
+        String data;
+
+        Node(String data){
+            this.data = data;
+            left = null;
+            right = null;
+            parent = null;
+        }
+    }
+    Node root;
+    
+    BinaryTree(){
+        root = null;
+    }
+
+    boolean morePrior(String bookName1, String bookName2){
+        int i = 0;
+        while (i < bookName1.length() && i < bookName2.length()){
+            if (bookName1.charAt(i) > bookName2.charAt(i)){
+                return true;
+            }else if (bookName1.charAt(i) < bookName2.charAt(i)){
+                return false;
+            }
+            i++;
+        }
+        return bookName1.length() > bookName2.length();
+    }
+
+    void insert(String data){
+        root = insert(root, data);
+    }
+
+    Node insert(Node root, String data){
+        if (root == null){
+            root = new Node(data);
+            return root;
+        }
+        if (morePrior(data, root.data)){
+            root.left = insert(root.left, data);
+            root.left.parent = root;
+        }else{
+            root.right = insert(root.right, data);
+            root.right.parent = root;
+        }
+        return root;
+    }
+
+    void replace(Node node , Node child){
+        if (node.parent == null){
+            root = child;
+        }else if (node.parent.left == node){
+            node.parent.left = child;
+        }else{
+            node.parent.right = child;
+        }
+        if (child != null){
+            child.parent = node.parent;
+        }
+    }
+
+    void delete(String data){
+        root = delete(root, data);
+    }
+
+    Node delete(Node root, String data){
+        if (root == null){
+            return root;
+        }
+        if (root.data.equals(data)){
+            if (root.left == null){
+                replace(root, root.right);
+            }else if (root.right == null){
+                replace(root, root.left);
+            }else{
+                Node temp = root.right;
+                while (temp.left != null){
+                    temp = temp.left;
+                }
+                root.data = temp.data;
+                delete(root.right, temp.data);
+            }
+        }else if (morePrior(data, root.data)){
+            delete(root.left, data);
+        }else{
+            delete(root.right, data);
+        }
+        return root;
+    }
+}
+
 class Person{
     String name;
-    String[] booksThatBorrowed = new String[100];
+    BinaryTree binaryTree;
     int numberOfBorrowing;
     boolean isInLibrary;
 
@@ -11,17 +106,12 @@ class Person{
         numberOfBorrowing=0;
     }
     void borrow(String bookName){
-        booksThatBorrowed[numberOfBorrowing]=bookName;
+        binaryTree.insert(bookName);
         numberOfBorrowing++;
         
     }
     void returnBook(String bookName){
-        for (int i=0; i<numberOfBorrowing; i++){
-            if (booksThatBorrowed[i].equals(bookName)){
-                booksThatBorrowed[i]=booksThatBorrowed[numberOfBorrowing-1];
-                break;
-            }
-        }
+        binaryTree.delete(bookName);
         numberOfBorrowing--;
     }
 
@@ -32,7 +122,8 @@ class Person{
 
 class Book{
     String name = new String();
-    String[] personsThatBorrowedThis = new String[100];
+    BinaryTree binaryTree;
+    
     int count;
     int borrowed;
     
@@ -48,16 +139,11 @@ class Book{
     }
 
     void returnBook(String personName){
-        for (int i=0; i<borrowed; i++){
-            if (personsThatBorrowedThis[i].equals(personName)){
-                personsThatBorrowedThis[i]=personsThatBorrowedThis[borrowed-1];
-                break;
-            }
-        }
+        binaryTree.delete(personName);
         borrowed--;
     }
     void borrow(String personName){
-        personsThatBorrowedThis[borrowed]=personName;
+        binaryTree.insert(personName);
         borrowed++;
     }
 }
@@ -206,7 +292,7 @@ class LibrariesPeople{
             return;
         }
         temp.person.borrow(temp2.book.name);
-        temp2.book.borrow();
+        temp2.book.borrow(temp.person.name);
         // assign the book to the person
         
     }
@@ -238,8 +324,94 @@ class LibrariesPeople{
             System.out.println("The book is not available");
             return;
         }
-        temp.person.returnBook();
-        temp2.book.borrow();
+        temp.person.returnBook(temp2.book.name);
+        temp2.book.borrow(temp.person.name);
     }
 
+    void isinLib(String personName){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+        if (temp.person.isInLibrary){
+            System.out.println("The person is in the library");
+        }else{
+            System.out.println("The person is not in the library");
+        }
+    }
+
+    // void TotalTimeInLib(String personName,float startTime,float endTime){
+    //     PersonNode temp = root;
+    //     for (int i=0; i<personName.length(); i++){
+    //         int index = personName.charAt(i)-65;
+    //         if (temp.children[index]==null){
+    //             temp.children[index]=new PersonNode(personName.charAt(i),temp);
+    //         }
+    //         temp=temp.children[index];
+    //     }
+    //     if (temp.person==null){
+    //         temp.person=new Person(personName);
+    //     }
+    //     if (temp.person.isInLibrary){
+    //         System.out.println("The person is in the library");
+    //         return;
+    //     }
+    //     float totalTime = 0;
+    //     for (int i=0; i<temp.person.timeInLibrary.size(); i++){
+    //         if (temp.person.timeInLibrary.get(i).get(0) >= startTime && temp.person.timeInLibrary.get(i).get(1) <= endTime){
+    //             totalTime += temp.person.timeInLibrary.get(i).get(1) - temp.person.timeInLibrary.get(i).get(0);
+    //         }
+    //     }
+    //     System.out.println("The total time is "+totalTime);
+    // }
+
+    void shouldBring(String personName,String bookName){
+        PersonNode temp = root;
+        for (int i=0; i<personName.length(); i++){
+            int index = personName.charAt(i)-65;
+            if (temp.children[index]==null){
+                temp.children[index]=new PersonNode(personName.charAt(i),temp);
+            }
+            temp=temp.children[index];
+        }
+        if (temp.person==null){
+            temp.person=new Person(personName);
+        }
+        if (!temp.person.isInLibrary){
+            System.out.println("The person is not in the library");
+            return;
+        }
+        BookNode temp2 = librariesBooks.root;
+        for (int i=0; i<bookName.length(); i++){
+            int index = bookName.charAt(i)-65;
+            if (temp2.children[index]==null){
+                temp2.children[index]=new BookNode(bookName.charAt(i),temp2);
+            }
+            temp2=temp2.children[index];
+        }
+        temp2.book.count-=1; // we give the book to the person so we decrease the count of the book
+        
+    }
+
+
+}
+
+
+
+public class Library {
+    public static void main(String[] args) {
+        String s = "AB";
+        String n = "AC";
+        // determine which string is more prior
+
+        System.out.println(s.compareTo(n));
+
+    }
 }
